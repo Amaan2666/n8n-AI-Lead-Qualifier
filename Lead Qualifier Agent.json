@@ -1,0 +1,228 @@
+{
+  "name": "Lead Qualifier Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        48,
+        -48
+      ],
+      "id": "a65b6542-641e-4749-99e3-86828e1e0865",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Name: {{$json[\"Customer Name\"]}}\nCompany: {{$json[\"Company Name\"]}}\nTranscript: {{$json[\"Transcript / Message\"]}}\nQuantity Mentioned: {{$json[\"Quantity Mentioned\"]}}\nLogo/Customization: {{$json[\"Logo / Customization Mentioned\"]}}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a lead qualification assistant for an ecommerce store. Your job is to determine if a customer from a phone call is a good lead for a **bulk order**.\n\nIf they mention:\n- large quantities\n- logos\n- team gifts\n- events\n- wholesale\n- or any indication of buying in bulk\n\nThen classify them as a **good lead**. Otherwise, mark them as not a good lead.\n\nRespond only in valid JSON with:\n- \"Name\": customer’s name\n- \"Is Good Lead\": Yes or No\n- \"Reasoning\": short one-sentence reason"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        656,
+        -16
+      ],
+      "id": "825f357b-5846-4916-a902-20f7d722cf8a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"Name\": \"Alex Chen\",\n  \"Is Good Lead\": \"No\",\n  \"Reasoning\": \"The customer is interested in buying a single item for personal use.\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        256
+      ],
+      "id": "c0bf3d72-2358-4d5d-ab62-c3c843c4cb0e",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "948759d1-4c0c-4751-a83d-9daa1ec3bb1c",
+              "name": "Name",
+              "value": "={{$json[\"output\"][\"Name\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "91dbdf7b-8f0d-4ae2-ab36-701b01b581e2",
+              "name": "Good Lead",
+              "value": "={{$json[\"output\"][\"Is Good Lead\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "5d38cd05-eb1a-4734-83d2-cdd5ee973ea7",
+              "name": "Reasoning",
+              "value": "={{ $json.output.Reasoning }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        -16
+      ],
+      "id": "494e2eb2-b8bd-4477-84c0-046ebdabbbd6",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "content": "## Lead Qualifier Agent\n",
+        "height": 500,
+        "width": 1300
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -112
+      ],
+      "id": "432125b2-1b30-4737-b777-8b74e3b08ba4",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        304,
+        192
+      ],
+      "id": "958946d3-3c81-4dc4-bfb4-f7d018200a15",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qr60owaRKAHc6AMkksKQgyp4nLeHLP-Qydl3M5IOoDE",
+          "mode": "list",
+          "cachedResultName": "Lead Qualifier Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qr60owaRKAHc6AMkksKQgyp4nLeHLP-Qydl3M5IOoDE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 388149541,
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qr60owaRKAHc6AMkksKQgyp4nLeHLP-Qydl3M5IOoDE/edit#gid=388149541"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        -48
+      ],
+      "id": "d34a5641-155e-48e0-9d3e-8b81fbef2158",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yqc2z6v7DxRr9Yty",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "248ddf6b-f10d-4481-bcea-b3735f76bc25",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cc34e211139cd0d6d1e9da68b433a5388f0bf0e7f394743e75155b1933337ace"
+  },
+  "nodeGroups": [],
+  "id": "aX4tCqrQqnwM498G",
+  "tags": []
+}
